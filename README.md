@@ -9,9 +9,7 @@ A premium, intelligent job application tracking platform that leverages **LangCh
 
 ## 🏗️ Architecture Diagram
 
-```mermaid
-![alt text](image.png)
-```
+<img width="1035" height="881" alt="Untitled Diagram drawio (3)" src="https://github.com/user-attachments/assets/870a23be-cb5d-46c5-832c-750b587eb4f0" />
 
 ---
 
