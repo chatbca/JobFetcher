@@ -1,19 +1,17 @@
-<<<<<<< HEAD
 
-=======
 ﻿# AI-Powered Job Tracker with Smart Matching
 
 A premium, intelligent job application tracking platform that leverages **LangChain** and **LangGraph** to match users with their ideal roles and provide an interactive AI assistant for job discovery.
 
 ---
 
-## 🏗️ Architecture Diagram
+## Architecture Diagram
 
 <img width="1035" height="881" alt="Untitled Diagram drawio (3)" src="https://github.com/user-attachments/assets/870a23be-cb5d-46c5-832c-750b587eb4f0" />
 
 ---
 
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 - **Node.js**: v18 or higher
@@ -57,7 +55,7 @@ A premium, intelligent job application tracking platform that leverages **LangCh
 
 ---
 
-## 🧠 LangChain & LangGraph Usage
+##LangChain & LangGraph Usage
 
 ### LangChain Job Matching
 We use LangChain's `ChatGoogleGenerativeAI` to power the `calculateJobMatch` service. 
@@ -80,7 +78,7 @@ The AI Assistant is built using a **StateGraph** to manage complex, multi-turn c
 
 ---
 
-## 🎯 AI Matching Logic
+##  AI Matching Logic
 
 ### Scoring Approach
 The engine doesn't just look for keywords; it performs **Semantic Analysis**:
@@ -95,7 +93,7 @@ The engine doesn't just look for keywords; it performs **Semantic Analysis**:
 
 ---
 
-## 💭 Design Reflections
+##  Design Reflections
 
 ### Popup Flow Design (Critical Thinking)
 We utilized a **Modal-First approach** (via Headless UI) for job details and application forms.
@@ -110,7 +108,7 @@ We utilized a **Modal-First approach** (via Headless UI) for job details and app
 
 ---
 
-## 📈 Scalability & Tradeoffs
+##  Scalability & Tradeoffs
 
 ### Scalability
 - **100+ Jobs**: Handled via client-side memoization and virtualized list structures to prevent DOM lag.
