@@ -36,30 +36,30 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--navy-900)' }}>
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center bg-blue-600 p-3 rounded-xl mb-4">
+          <div className="inline-flex items-center justify-center bg-orange-500 p-3 rounded-xl mb-4 shadow-lg shadow-orange-500/20">
             <Briefcase className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">JobTracker AI</h1>
-          <p className="text-gray-600 mt-2">AI-Powered Job Search & Tracking</p>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">JobTracker AI</h1>
+          <p className="text-slate-400 mt-2 font-medium">AI-Powered Job Search & Tracking</p>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-lg shadow-xl p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sign In</h2>
+        <div className="clay-card p-8 border-navy-700/50">
+          <h2 className="text-2xl font-bold text-slate-800 mb-6">Sign In</h2>
 
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-sm text-red-700">{error}</p>
+              <p className="text-sm text-red-700 font-medium">{error}</p>
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-slate-700 mb-2">
                 Email
               </label>
               <input
@@ -68,12 +68,12 @@ const Login = () => {
                 onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
                 placeholder="your@email.com"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="filter-input"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-slate-700 mb-2">
                 Password
               </label>
               <input
@@ -82,14 +82,14 @@ const Login = () => {
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 placeholder=""
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="filter-input"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full btn btn-primary flex items-center justify-center gap-2 mt-2 h-11"
             >
               {isLoading ? (
                 <>
@@ -103,26 +103,36 @@ const Login = () => {
           </form>
 
           {/* Demo Account */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-sm text-gray-600 text-center mb-3">
-              Try the demo account:
+          <div className="mt-8 pt-6 border-t border-slate-100">
+            <p className="text-xs font-bold text-slate-500 text-center uppercase tracking-wider mb-4">
+              Quick access
             </p>
             <button
               onClick={handleDemoLogin}
-              className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+              className="w-full btn btn-secondary flex items-center justify-center h-11"
             >
               Use Demo Credentials
             </button>
-            <p className="text-xs text-gray-500 text-center mt-2">
-              Email: test@gmail.com | Password: test@123
+            <p className="text-[11px] text-slate-400 text-center mt-3 font-medium">
+              Email: <span className="text-slate-500">test@gmail.com</span> | Password: <span className="text-slate-500">test@123</span>
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-600 mt-6">
-          Built with LangChain & LangGraph for AI-powered matching
-        </p>
+        <div className="mt-8 text-center flex flex-col items-center gap-3">
+          <p className="text-sm font-medium text-slate-500">
+            Built with LangChain & LangGraph for AI-powered matching
+          </p>
+          <a
+            href="https://jobbackend-o5tj.onrender.com/api"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[10px] text-slate-700 hover:text-slate-600 transition-colors uppercase tracking-widest font-bold"
+          >
+            System Status
+          </a>
+        </div>
       </div>
     </div>
   );
