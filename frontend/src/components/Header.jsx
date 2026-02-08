@@ -1,6 +1,6 @@
 ﻿import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Briefcase, FileText, LogOut, Upload } from 'lucide-react';
+import { Briefcase, FileText, LogOut, Upload, Menu, X as CloseIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import ResumeUpload from './ResumeUpload';
 
@@ -8,75 +8,134 @@ const Header = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
   const [showResumeUpload, setShowResumeUpload] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
 
   const handleResumeUploaded = () => {
-    // Optionally refresh data or show success message
     console.log('Resume uploaded successfully');
   };
 
+  const NavLinks = ({ mobile = false }) => (
+    <>
+      <Link
+        to="/jobs"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${mobile ? 'w-full text-center' : ''
+          } ${isActive('/jobs')
+            ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+            : 'text-slate-300 hover:text-white hover:bg-navy-800'
+          }`}
+      >
+        Jobs
+      </Link>
+      <Link
+        to="/applications"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${mobile ? 'w-full text-center' : ''
+          } ${isActive('/applications')
+            ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20'
+            : 'text-slate-300 hover:text-white hover:bg-navy-800'
+          }`}
+      >
+        Applications
+      </Link>
+    </>
+  );
+
   return (
     <>
-      <header className="bg-white shadow-sm border-b border-gray-200">
+      <header style={{
+        background: 'var(--navy-900)',
+        borderBottom: '1px solid var(--navy-700)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
+      }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <Link to="/jobs" className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
+              <div className="bg-orange-500 p-2 rounded-lg flex-shrink-0">
                 <Briefcase className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xl font-bold text-gray-900">JobTracker AI</span>
+              <span className="text-xl font-bold text-white tracking-tight truncate">JobTracker AI</span>
             </Link>
 
-            {/* Navigation */}
-            <nav className="flex items-center gap-4">
-              <Link
-                to="/jobs"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isActive('/jobs')
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Jobs
-              </Link>
-              <Link
-                to="/applications"
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  isActive('/applications')
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Applications
-              </Link>
-              
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center gap-4">
+              <NavLinks />
+
               <button
                 onClick={() => setShowResumeUpload(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
+                className="flex items-center gap-2 px-5 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 font-bold transition-all duration-200 shadow-lg shadow-teal-500/20"
               >
                 <Upload className="w-4 h-4" />
-                Upload Resume
+                Upload
               </button>
 
               {/* User Menu */}
-              <div className="flex items-center gap-3 pl-4 border-l border-gray-300">
-                <div className="text-sm">
-                  <p className="font-medium text-gray-900">{user?.name || 'User'}</p>
-                  <p className="text-gray-500">{user?.email}</p>
+              <div className="flex items-center gap-4 pl-4 border-l border-navy-700">
+                <div className="text-right">
+                  <p className="text-sm font-bold text-white leading-tight">{user?.name || 'User'}</p>
+                  <p className="text-[11px] font-medium text-slate-400">{user?.email}</p>
                 </div>
                 <button
                   onClick={logout}
-                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 text-slate-400 hover:text-white hover:bg-navy-800 rounded-lg transition-all duration-200"
                   title="Logout"
                 >
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <div className="flex md:hidden items-center gap-2">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="p-2 text-slate-300 hover:text-white transition-colors"
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <CloseIcon className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-navy-700 py-4 px-4 bg-navy-900 shadow-2xl">
+            <div className="flex flex-col gap-4">
+              <NavLinks mobile />
+              <button
+                onClick={() => {
+                  setShowResumeUpload(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="flex items-center justify-center gap-2 px-5 py-3 bg-teal-500 text-white rounded-lg font-bold"
+              >
+                <Upload className="w-4 h-4" />
+                Upload Resume
+              </button>
+
+              <div className="pt-4 border-t border-navy-700 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-white">{user?.name || 'User'}</p>
+                  <p className="text-[11px] text-slate-400">{user?.email}</p>
+                </div>
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-2 px-4 py-2 text-slate-400 font-bold hover:text-white transition-colors"
+                >
+                  <LogOut className="w-5 h-5" />
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Resume Upload Modal */}

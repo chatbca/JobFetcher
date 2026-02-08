@@ -1,15 +1,36 @@
-﻿import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 dotenv.config();
 
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 
-const llm = new ChatGoogleGenerativeAI({
-  model: 'gemini-pro',
-  temperature: 0.3,
-  apiKey: process.env.GOOGLE_API_KEY
-});
+let llm = null;
+let aiEnabled = false;
+
+try {
+  const hasKey = Boolean(process.env.GOOGLE_API_KEY);
+  const isPlaceholder = process.env.GOOGLE_API_KEY === 'your_google_gemini_api_key_here';
+
+  if (hasKey) {
+    if (!isPlaceholder) {
+      llm = new ChatGoogleGenerativeAI({
+        model: 'gemini-pro',
+        temperature: 0.3,
+        apiKey: process.env.GOOGLE_API_KEY
+      });
+      aiEnabled = true;
+      console.log('Gemini AI (job matching) initialized');
+    } else {
+      console.log('No Gemini API key for job matching - using heuristic scoring');
+    }
+  } else {
+    console.log('No Gemini API key for job matching - using heuristic scoring');
+  }
+} catch (error) {
+  console.log('Gemini job matching initialization failed - using heuristic scoring');
+  aiEnabled = false;
+}
 
 const matchingPrompt = PromptTemplate.fromTemplate(`
 You are an AI job matching expert. Analyze a candidate's resume and a job description to calculate a match score.
@@ -57,6 +78,14 @@ export async function calculateJobMatch(resumeText, job) {
       missingRequirements: job.skills || [],
       reasoning: 'Please upload your resume to see match scores'
     };
+  }
+
+  if (!aiEnabled) {
+    return simpleMatch(resumeText, job);
+  }
+
+  if (!llm) {
+    return simpleMatch(resumeText, job);
   }
 
   try {

@@ -1,5 +1,5 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Sparkles, X, Send, Loader2 } from 'lucide-react';
 import { chatWithAI } from '../services/api';
 
 const AIAssistant = ({ onFilterUpdate }) => {
@@ -7,7 +7,7 @@ const AIAssistant = ({ onFilterUpdate }) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: 'Hi! I can help you find jobs. Try saying "Show me remote React jobs" or "Find Python roles posted this week".',
+      content: 'Hello! I can help you discover the perfect job opportunities. Try asking me: "Show remote React positions" or "Find senior Python roles posted this week".',
     },
   ]);
   const [input, setInput] = useState('');
@@ -39,21 +39,19 @@ const AIAssistant = ({ onFilterUpdate }) => {
     setIsLoading(true);
 
     try {
-      const response = await chatWithAI(userMessage, sessionId);
+      const { data } = await chatWithAI(userMessage, sessionId);
+      const assistantReply = data?.response || 'I have updated your search results.';
       
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: response.response },
+        { role: 'assistant', content: assistantReply },
       ]);
 
-      // Update filters if the AI extracted any
-      if (response.filters && onFilterUpdate) {
-        onFilterUpdate(response.filters);
+      if (data?.filters && onFilterUpdate) {
+        onFilterUpdate(data.filters);
       }
 
-      // Handle special actions (e.g., navigate to applications)
-      if (response.action === 'SHOW_APPLICATIONS') {
-        // This would be handled by the parent component
+      if (data?.action === 'SHOW_APPLICATIONS') {
         console.log('Action: Show applications');
       }
     } catch (error) {
@@ -62,7 +60,7 @@ const AIAssistant = ({ onFilterUpdate }) => {
         ...prev,
         {
           role: 'assistant',
-          content: 'Sorry, I encountered an error. Please try again.',
+          content: 'I apologize, but I encountered an error. Please try again in a moment.',
         },
       ]);
     } finally {
@@ -79,85 +77,86 @@ const AIAssistant = ({ onFilterUpdate }) => {
 
   return (
     <>
-      {/* Floating Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 bg-blue-600 text-white p-4 rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 z-50"
+          className="ai-fab"
           aria-label="Open AI Assistant"
         >
-          <MessageCircle className="w-6 h-6" />
+          <Sparkles className="w-7 h-7" />
         </button>
       )}
 
-      {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 flex flex-col z-50">
-          {/* Header */}
-          <div className="bg-blue-600 text-white p-4 rounded-t-lg flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              <h3 className="font-semibold">AI Job Assistant</h3>
+        <div className="ai-panel">
+          <div className="ai-panel-header">
+            <div className="ai-panel-title">
+              <Sparkles className="w-5 h-5" />
+              AI Career Assistant
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="hover:bg-blue-700 p-1 rounded"
+              style={{
+                background: 'rgba(255, 255, 255, 0.2)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: 'white',
+                transition: 'background 180ms ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
               aria-label="Close"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto max-h-96 space-y-4">
+          <div className="ai-panel-messages">
             {messages.map((message, index) => (
               <div
                 key={index}
-                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`ai-message ${message.role}`}
               >
-                <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
-                    message.role === 'user'
-                      ? 'bg-blue-600 text-white rounded-br-none'
-                      : 'bg-gray-100 text-gray-900 rounded-bl-none'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                </div>
+                {message.content}
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-gray-100 p-3 rounded-lg rounded-bl-none">
-                  <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
-                </div>
+              <div className="ai-message assistant" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--teal-500)' }} />
+                <span>Analyzing your request...</span>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex gap-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything about jobs..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                disabled={isLoading}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                aria-label="Send"
-              >
-                <Send className="w-5 h-5" />
-              </button>
-            </div>
+          <div className="ai-panel-input">
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Ask me anything about your job search..."
+              disabled={isLoading}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isLoading}
+              className="btn btn-ai"
+              style={{
+                padding: '0.875rem',
+                minWidth: 'auto'
+              }}
+              aria-label="Send"
+            >
+              <Send className="w-5 h-5" />
+            </button>
           </div>
         </div>
       )}

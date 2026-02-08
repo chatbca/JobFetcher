@@ -1,7 +1,7 @@
-﻿import React from 'react';
-import { X } from 'lucide-react';
+import React from 'react';
+import { X, Filter } from 'lucide-react';
 
-const Filters = ({ filters, onFilterChange, onClear }) => {
+const Filters = ({ filters, onFilterChange, onClear, activeCount = 0 }) => {
   const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship'];
   const workModes = ['Remote', 'Hybrid', 'On-site'];
   const dateOptions = [
@@ -10,16 +10,16 @@ const Filters = ({ filters, onFilterChange, onClear }) => {
     { value: 'month', label: 'Last month' },
   ];
   const matchScoreOptions = [
-    { value: 'high', label: 'High (>70%)' },
-    { value: 'medium', label: 'Medium (40-70%)' },
-    { value: 'all', label: 'All' },
+    { value: 'high', label: 'High Match (>70%)' },
+    { value: 'medium', label: 'Good Match (40-70%)' },
+    { value: 'all', label: 'All Matches' },
   ];
 
   const commonSkills = [
     'React', 'Node.js', 'Python', 'JavaScript', 'TypeScript',
     'Java', 'AWS', 'Docker', 'Kubernetes', 'SQL', 'MongoDB',
     'PostgreSQL', 'Vue.js', 'Angular', 'Django', 'FastAPI',
-    'Machine Learning', 'TensorFlow', 'PyTorch'
+    'Machine Learning', 'TensorFlow', 'PyTorch', 'Go', 'Rust'
   ];
 
   const handleSkillToggle = (skill) => {
@@ -31,48 +31,46 @@ const Filters = ({ filters, onFilterChange, onClear }) => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
-        <button
-          onClick={onClear}
-          className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-        >
-          <X className="w-4 h-4" />
-          Clear All
-        </button>
+    <div className="filters">
+      <div className="filters-header">
+        <div>
+          <h2 className="filters-title">
+            <Filter className="w-5 h-5" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '0.5rem' }} />
+            Filters
+          </h2>
+          {activeCount > 0 && (
+            <span style={{ fontSize: '0.8125rem', color: 'var(--orange-500)', fontWeight: 600, marginLeft: '0.5rem' }}>
+              ({activeCount} active)
+            </span>
+          )}
+        </div>
+        {activeCount > 0 && (
+          <button onClick={onClear} className="btn-ghost" style={{ padding: '0.5rem 0.875rem', fontSize: '0.875rem' }}>
+            <X className="w-4 h-4" />
+            Clear All
+          </button>
+        )}
       </div>
 
-      {/* Search Query */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Role / Title
-        </label>
+      <div className="filter-group">
+        <label className="filter-label">Search Role</label>
         <input
           type="text"
           value={filters.query || ''}
           onChange={(e) => onFilterChange('query', e.target.value)}
-          placeholder="e.g. React Developer"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="e.g. Senior React Developer"
+          className="filter-input"
         />
       </div>
 
-      {/* Skills */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Skills
-        </label>
-        <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+      <div className="filter-group">
+        <label className="filter-label">Skills</label>
+        <div className="filter-chips" style={{ maxHeight: '200px', overflowY: 'auto' }}>
           {commonSkills.map((skill) => (
             <button
               key={skill}
               onClick={() => handleSkillToggle(skill)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                (filters.skills || []).includes(skill)
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={`filter-chip ${(filters.skills || []).includes(skill) ? 'active' : ''}`}
             >
               {skill}
             </button>
@@ -80,18 +78,14 @@ const Filters = ({ filters, onFilterChange, onClear }) => {
         </div>
       </div>
 
-      {/* Date Posted */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Date Posted
-        </label>
+      <div className="filter-group">
+        <label className="filter-label">Match Score</label>
         <select
-          value={filters.datePosted || ''}
-          onChange={(e) => onFilterChange('datePosted', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={filters.matchScore || 'all'}
+          onChange={(e) => onFilterChange('matchScore', e.target.value)}
+          className="filter-input"
         >
-          <option value="">Any time</option>
-          {dateOptions.map((option) => (
+          {matchScoreOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
@@ -99,93 +93,68 @@ const Filters = ({ filters, onFilterChange, onClear }) => {
         </select>
       </div>
 
-      {/* Job Type */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Job Type
-        </label>
-        <div className="space-y-2">
+      <div className="filter-group">
+        <label className="filter-label">Job Type</label>
+        <div className="filter-chips">
+          <button
+            onClick={() => onFilterChange('jobType', '')}
+            className={`filter-chip ${!filters.jobType ? 'active' : ''}`}
+          >
+            All Types
+          </button>
           {jobTypes.map((type) => (
-            <label key={type} className="flex items-center">
-              <input
-                type="radio"
-                name="jobType"
-                checked={filters.jobType === type}
-                onChange={() => onFilterChange('jobType', type)}
-                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">{type}</span>
-            </label>
+            <button
+              key={type}
+              onClick={() => onFilterChange('jobType', type)}
+              className={`filter-chip ${filters.jobType === type ? 'active' : ''}`}
+            >
+              {type}
+            </button>
           ))}
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="jobType"
-              checked={!filters.jobType}
-              onChange={() => onFilterChange('jobType', '')}
-              className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm text-gray-700">All</span>
-          </label>
         </div>
       </div>
 
-      {/* Work Mode */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Work Mode
-        </label>
-        <div className="space-y-2">
+      <div className="filter-group">
+        <label className="filter-label">Work Mode</label>
+        <div className="filter-chips">
+          <button
+            onClick={() => onFilterChange('workMode', '')}
+            className={`filter-chip ${!filters.workMode ? 'active' : ''}`}
+          >
+            All Modes
+          </button>
           {workModes.map((mode) => (
-            <label key={mode} className="flex items-center">
-              <input
-                type="radio"
-                name="workMode"
-                checked={filters.workMode === mode}
-                onChange={() => onFilterChange('workMode', mode)}
-                className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">{mode}</span>
-            </label>
+            <button
+              key={mode}
+              onClick={() => onFilterChange('workMode', mode)}
+              className={`filter-chip ${filters.workMode === mode ? 'active' : ''}`}
+            >
+              {mode}
+            </button>
           ))}
-          <label className="flex items-center">
-            <input
-              type="radio"
-              name="workMode"
-              checked={!filters.workMode}
-              onChange={() => onFilterChange('workMode', '')}
-              className="w-4 h-4 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="ml-2 text-sm text-gray-700">All</span>
-          </label>
         </div>
       </div>
 
-      {/* Location */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Location
-        </label>
+      <div className="filter-group">
+        <label className="filter-label">Location</label>
         <input
           type="text"
           value={filters.location || ''}
           onChange={(e) => onFilterChange('location', e.target.value)}
-          placeholder="e.g. San Francisco"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          placeholder="e.g. San Francisco, Remote"
+          className="filter-input"
         />
       </div>
 
-      {/* Match Score */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Match Score
-        </label>
+      <div className="filter-group">
+        <label className="filter-label">Date Posted</label>
         <select
-          value={filters.matchScore || 'all'}
-          onChange={(e) => onFilterChange('matchScore', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={filters.datePosted || ''}
+          onChange={(e) => onFilterChange('datePosted', e.target.value)}
+          className="filter-input"
         >
-          {matchScoreOptions.map((option) => (
+          <option value="">Any time</option>
+          {dateOptions.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>

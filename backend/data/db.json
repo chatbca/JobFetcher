@@ -1,0 +1,178 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "name": "Avery Candidate",
+      "email": "test@gmail.com",
+      "password": "test@123",
+      "resume": {
+        "filename": "Neelanjan V MCA.pdf",
+        "mimetype": "application/pdf",
+        "uploadedAt": "2026-02-07T14:49:47.906Z"
+      },
+      "resumeText": "\n\nNeelanjan V  \nM a s t e r   o f   C o m p u t e r   A p p l i c a t i o n s \n \nIndia • neelanjanv08@gmail.com •  +918861756947   • LinkedIn: http://www.linkedin.com/in/neelanjan-v • \nGitHub: https://github.com/chatbca • Portfolio: https://neelanjanv.onrender.com/ • \nO B J E C T I V E \nMCA graduate with a genuine passion for building applications that solve real problems. Hands-on experience \nacross web, mobile, and AI-powered projects has strengthened my love for learning new technologies and \ntackling creative challenges. Eager to contribute my technical skills and fresh energy to a team where I can \ngrow and make a meaningful impact \nE D U C A T I O N  \nMaster of Computer Applications (MCA) | CGPA: 8.91 (O+) | 2024 – 2026 (Expected: October) \nPoornaprajna Institute of Management, Udupi (Mangalore University)   \n \nBachelor of Computer Applications (BCA) | CGPA: 8.77 (OA+) | 2021 - 2024 \nUdupi College of Professional Studies, Manipal (Mangalore University) \n \nPre University (PCMB) | 75.33% (First Class) | 2019 - 2021 \nPoornaprajna Pre University College, Udupi \n \nE X P E R I E N C E   /   I N T E R N S H I P   E X P E R I E N C E  \n \nSoftware Development Intern – My Computer, Udupi   \n• Contributed to development of “MyBus”, a web-based bus ticketing and management system   \n• Assisted in frontend and backend feature implementation   \n• Worked with databases, authentication, and deployment workflows   \n \n \n CERTIFICATIONS & TRAINING \n• Data base Management System-NPTEL \n• The Joy of Computing using Python-NPTEL \n• Hardware Maintenance and Basics of Networking-MICE \n• Hands-on Workshop on Web Development (5 Days) \n• Web Development Training - PHP for Web Development-Infosys Springboard \nSKILLS \nTechnical skills \n• Languages: Java, Python, C, R, PHP, Dart \n• Frontend: React, Flutter, JavaScript, HTML, CSS \n• Backend & Database: Supabase, PostgreSQL, SQL, Firebase, Node.js \n• Hardware: PC assembly, system configuration, troubleshooting \n• Tools & Platforms: Git, GitHub, Vercel, Android Studio, VS Code, Postman, Figma, Docker, \nGoogle Play Console, Google Cloud Console, Firebase Console \n \nSoft skills \nProblem-solving • Communication • Teamwork • Leadership • Adaptability • Time Management \n\nPROJECTS \n1. Feel It Buy – Full-Stack E-Commerce Ecosystem \nTeam Lead & Full-Stack Developer | 1st Place – Development Challenge \nLive: www.feelitbuy.com \n• Built production-ready e-commerce platform with Customer, Admin, Portal & Delivery apps \n• Designed scalable backend using Supabase (PostgreSQL) with real-time sync & secure access \ncontrol \n• Implemented wallet, referrals, live tracking & Razorpay payment integration \n• Deployed cross-platform apps using Flutter (Web & Mobile) on Vercel \nTech: Flutter, Supabase, PostgreSQL, Node.js, Razorpay, Git \n \n \n2. ElevateHire – Networking & Placement Training App (In Progress) \n       GitHub: https://github.com/chatbca/ElevateHire \n• Building platform to connect students, alumni, and recruiters for professional networking \n• Developing   placement   training   modules   including   aptitude,   technical,   and   interview \npreparation \n• Implementing user profiles, skill showcasing, and mentorship interaction features \n• Designing scalable backend with secure authentication and role-based access \nTech: Flutter, Supabase \n \n3. QuizAstra – Android Quiz Application \nGitHub: https://github.com/chatbca/QuizAstra \n              https://github.com/chatbca/QuizAstra-Admin \n• Developed user app & admin panel with secure authentication and dashboards \n• Implemented real-time multiplayer battles with anti-cheat logic \n• Built global/category leaderboards with Firebase sync & offline support \n• Designed modern UI using Material Design 3 \nTech: Java, Android SDK, Firebase, Git \n \n4. PlaySphere – Music Streaming Platform \nGitHub: https://github.com/chatbca/PlaySphere \n• Built web platform for music streaming, uploads, playlists & profiles \n• Developed artist studio for track management and auto-mix features \n• Created admin panel for moderation and content control \n• Designed responsive UI for smooth user experience \nTech: PHP, MySQL, JavaScript, HTML, CSS \n \n5. AI Web Artisan – GenAI Website Builder \nLive: ai-web-artisan.onrender.com | GitHub: https://github.com/chatbca/AI-Web-Artisan \n• Built GenAI platform to generate multi-page websites from natural language \n• Integrated Gemini API using Google Genkit \n• Implemented real-time code editor with live preview \n• Designed interactive React interface for rapid prototyping \n            Tech: React, Genkit \n \nLANGUAGES KNOWN \nEnglish, Hindi, Kannada, Tulu \n ",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2026-02-07T14:49:47.906Z"
+    }
+  ],
+  "recruiters": [
+    {
+      "id": "recruiter-1",
+      "name": "Alex Recruiter",
+      "email": "admin@company.com",
+      "password": "admin@123",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z"
+    }
+  ],
+  "jobs": [
+    {
+      "id": "job-1770471082796-572",
+      "recruiterId": "recruiter-1",
+      "title": "Test",
+      "company": "test",
+      "location": "Remote",
+      "description": "test",
+      "skills": [
+        "test",
+        "test"
+      ],
+      "jobType": "Full-time",
+      "workMode": "Remote",
+      "experienceLevel": "Mid",
+      "applyLink": "test",
+      "status": "Open",
+      "createdAt": "2026-02-07T13:31:22.796Z",
+      "updatedAt": "2026-02-07T13:31:22.796Z",
+      "applicants": 0
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1770475750481-379",
+      "userId": "1",
+      "jobId": "8",
+      "jobTitle": "Software Engineering Intern",
+      "company": "BigTech Corp",
+      "status": "Offer",
+      "appliedVia": "external",
+      "appliedDate": "2026-02-07T14:49:10.475Z",
+      "notes": "",
+      "matchScore": 100,
+      "matchDetails": {
+        "score": 100,
+        "matchingSkills": [
+          "React",
+          "Node.js",
+          "Python",
+          "Git",
+          "JavaScript"
+        ],
+        "relevantExperience": "Experience relevant to Software Engineering Intern",
+        "missingRequirements": [],
+        "reasoning": "Based on 5 matching skills out of 5 required"
+      },
+      "resumeSummary": "Experience relevant to Software Engineering Intern",
+      "candidateName": "Avery Candidate",
+      "candidateEmail": "test@gmail.com",
+      "recruiterId": null,
+      "createdAt": "2026-02-07T14:49:10.481Z",
+      "updatedAt": "2026-02-08T02:02:12.129Z",
+      "timeline": [
+        {
+          "status": "Applied",
+          "actor": "candidate",
+          "timestamp": "2026-02-07T14:49:10.481Z"
+        },
+        {
+          "status": "Offer",
+          "actor": "candidate",
+          "timestamp": "2026-02-08T02:02:12.129Z"
+        }
+      ]
+    },
+    {
+      "id": "app-1770483265644-453",
+      "userId": "1",
+      "jobId": "3",
+      "jobTitle": "Frontend Developer",
+      "company": "Design Studio",
+      "status": "Interview",
+      "appliedVia": "external",
+      "appliedDate": "2026-02-07T16:54:25.623Z",
+      "notes": "",
+      "matchScore": 93,
+      "matchDetails": {
+        "score": 93,
+        "matchingSkills": [
+          "JavaScript",
+          "React",
+          "CSS",
+          "HTML",
+          "Figma"
+        ],
+        "relevantExperience": "Experience relevant to Frontend Developer",
+        "missingRequirements": [
+          "Vue.js"
+        ],
+        "reasoning": "Based on 5 matching skills out of 6 required"
+      },
+      "resumeSummary": "Experience relevant to Frontend Developer",
+      "candidateName": "Avery Candidate",
+      "candidateEmail": "test@gmail.com",
+      "recruiterId": null,
+      "createdAt": "2026-02-07T16:54:25.643Z",
+      "updatedAt": "2026-02-07T16:54:33.669Z",
+      "timeline": [
+        {
+          "status": "Applied",
+          "actor": "candidate",
+          "timestamp": "2026-02-07T16:54:25.644Z"
+        },
+        {
+          "status": "Interview",
+          "actor": "candidate",
+          "timestamp": "2026-02-07T16:54:33.669Z"
+        }
+      ]
+    },
+    {
+      "id": "app-1770516124460-894",
+      "userId": "1",
+      "jobId": "8",
+      "jobTitle": "Software Engineering Intern",
+      "company": "BigTech Corp",
+      "status": "Applied",
+      "appliedVia": "external",
+      "appliedDate": "2026-02-08T02:02:04.436Z",
+      "notes": "",
+      "matchScore": 100,
+      "matchDetails": {
+        "score": 100,
+        "matchingSkills": [
+          "React",
+          "Node.js",
+          "Python",
+          "Git",
+          "JavaScript"
+        ],
+        "relevantExperience": "Experience relevant to Software Engineering Intern",
+        "missingRequirements": [],
+        "reasoning": "Based on 5 matching skills out of 5 required"
+      },
+      "resumeSummary": "Experience relevant to Software Engineering Intern",
+      "candidateName": "Avery Candidate",
+      "candidateEmail": "test@gmail.com",
+      "recruiterId": null,
+      "createdAt": "2026-02-08T02:02:04.460Z",
+      "updatedAt": "2026-02-08T02:02:04.460Z",
+      "timeline": [
+        {
+          "status": "Applied",
+          "actor": "candidate",
+          "timestamp": "2026-02-08T02:02:04.460Z"
+        }
+      ]
+    }
+  ]
+}

@@ -1,120 +1,108 @@
-﻿import React from 'react';
-import { MapPin, Building2, Clock, Briefcase, ExternalLink } from 'lucide-react';
+import React from 'react';
+import { MapPin, Building2, Clock, Briefcase, ExternalLink, Sparkles } from 'lucide-react';
 
-const JobCard = ({ job, onApply }) => {
-  const getMatchBadge = (score) => {
-    if (score > 70) {
-      return {
-        color: 'bg-green-100 text-green-800 border-green-300',
-        label: 'High Match',
-      };
-    } else if (score >= 40) {
-      return {
-        color: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        label: 'Good Match',
-      };
-    } else {
-      return {
-        color: 'bg-gray-100 text-gray-600 border-gray-300',
-        label: 'Low Match',
-      };
-    }
+const JobCard = ({ job, onApply, compact = false }) => {
+  const getMatchLevel = (score) => {
+    if (score > 70) return 'high';
+    if (score >= 40) return 'medium';
+    return 'low';
   };
 
-  const badge = getMatchBadge(job.matchScore || 0);
+  const getMatchLabel = (score) => {
+    if (score > 70) return 'Excellent Match';
+    if (score >= 40) return 'Good Match';
+    return 'Match';
+  };
+
+  const matchLevel = job.matchScore ? getMatchLevel(job.matchScore) : null;
   const hasResume = job.matchScore > 0;
 
   return (
-    <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-      {/* Header */}
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold text-gray-900 mb-1">
-            {job.title}
-          </h3>
-          <div className="flex items-center text-gray-600 mb-2">
-            <Building2 className="w-4 h-4 mr-1" />
-            <span className="font-medium">{job.company}</span>
-          </div>
+    <div className={`job-card ${compact ? 'compact' : ''}`}>
+      <div className="job-card-header">
+        <div className="job-company-logo">
+          {job.company?.substring(0, 2).toUpperCase() || 'JB'}
         </div>
-        
-        {/* Match Score Badge */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h3 className="job-card-title">{job.title}</h3>
+          <p className="job-card-company">
+            <Building2 className="w-4 h-4" />
+            {job.company}
+          </p>
+        </div>
         {hasResume && (
-          <div className={`px-3 py-1 rounded-full border text-sm font-medium ${badge.color}`}>
-            {job.matchScore}% {badge.label}
+          <div className={`match-badge ${matchLevel}`}>
+            <Sparkles className="w-4 h-4" />
+            <span>{job.matchScore}%</span>
           </div>
         )}
       </div>
 
-      {/* Job Details */}
-      <div className="flex flex-wrap gap-3 mb-4 text-sm text-gray-600">
-        <div className="flex items-center">
-          <MapPin className="w-4 h-4 mr-1" />
-          {job.location}
-        </div>
-        <div className="flex items-center">
-          <Briefcase className="w-4 h-4 mr-1" />
-          {job.jobType}
-        </div>
-        <div className="flex items-center">
-          <Clock className="w-4 h-4 mr-1" />
-          {job.workMode}
-        </div>
+      <div className="job-card-meta">
+        {job.location && (
+          <span>
+            <MapPin className="w-4 h-4" />
+            {job.location}
+          </span>
+        )}
+        {job.jobType && (
+          <span>
+            <Briefcase className="w-4 h-4" />
+            {job.jobType}
+          </span>
+        )}
+        {job.workMode && (
+          <span>
+            <Clock className="w-4 h-4" />
+            {job.workMode}
+          </span>
+        )}
       </div>
 
-      {/* Description */}
-      <p className="text-gray-700 mb-4 line-clamp-3">
-        {job.description}
-      </p>
+      {!compact && job.description && (
+        <p className="job-card-description">{job.description}</p>
+      )}
 
-      {/* Skills */}
-      {job.skills && job.skills.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {job.skills.slice(0, 5).map((skill, index) => (
-            <span
-              key={index}
-              className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
-            >
+      {!compact && job.skills && job.skills.length > 0 && (
+        <div className="job-card-skills">
+          {job.skills.slice(0, 6).map((skill, index) => (
+            <span key={index} className="skill-tag">
               {skill}
             </span>
           ))}
-          {job.skills.length > 5 && (
-            <span className="px-2 py-1 text-gray-500 text-xs">
-              +{job.skills.length - 5} more
+          {job.skills.length > 6 && (
+            <span className="skill-tag" style={{ opacity: 0.6 }}>
+              +{job.skills.length - 6} more
             </span>
           )}
         </div>
       )}
 
-      {/* Match Details */}
       {hasResume && job.matchDetails && (
-        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm font-medium text-gray-700 mb-2">Why this matches:</p>
-          {job.matchDetails.matchingSkills && job.matchDetails.matchingSkills.length > 0 && (
-            <p className="text-sm text-gray-600 mb-1">
-              <span className="font-medium">Matching skills:</span>{' '}
-              {job.matchDetails.matchingSkills.join(', ')}
+        <div className={`match-reasoning ${compact ? 'compact' : ''}`}>
+          <p className="reasoning-label">
+            Why this matches
+          </p>
+          {!compact && job.matchDetails.matchingSkills && job.matchDetails.matchingSkills.length > 0 && (
+            <p className="reasoning-skills">
+              <span style={{ fontWeight: 600 }}>Your skills:</span>{' '}
+              {job.matchDetails.matchingSkills.slice(0, 4).join(', ')}
+              {job.matchDetails.matchingSkills.length > 4 && ` +${job.matchDetails.matchingSkills.length - 4} more`}
             </p>
           )}
           {job.matchDetails.reasoning && (
-            <p className="text-sm text-gray-600">
+            <p className="reasoning-text">
               {job.matchDetails.reasoning}
             </p>
           )}
         </div>
       )}
 
-      {/* Salary & Apply Button */}
-      <div className="flex justify-between items-center">
+      <div className="job-card-footer">
         {job.salary && (
-          <span className="text-lg font-semibold text-gray-900">
-            {job.salary}
-          </span>
+          <span className="job-salary">{job.salary}</span>
         )}
-        <button
-          onClick={() => onApply(job)}
-          className="ml-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium"
-        >
+        <button onClick={() => onApply(job)} className="btn btn-primary" style={{ marginLeft: 'auto' }}>
           Apply Now
           <ExternalLink className="w-4 h-4" />
         </button>

@@ -1,11 +1,11 @@
-﻿import React, { useState, useEffect } from 'react';
-import { Loader2, AlertCircle, Star, Sparkles } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { Loader2, AlertCircle, Sparkles, SlidersHorizontal, X, TrendingUp } from 'lucide-react';
 import Header from '../components/Header';
 import Filters from '../components/Filters';
 import JobCard from '../components/JobCard';
 import AIAssistant from '../components/AIAssistant';
 import ApplyPopup from '../components/ApplyPopup';
-import { getJobs } from '../services/api';
+import { getJobs, getResumeStatus } from '../services/api';
 
 const Jobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -15,31 +15,28 @@ const Jobs = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [hasResume, setHasResume] = useState(false);
+  const [isFilterSheetOpen, setFilterSheetOpen] = useState(false);
+  const filtersRef = useRef(filters);
 
   useEffect(() => {
-    fetchJobs();
-  }, []);
+    filtersRef.current = filters;
+  }, [filters]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [filters, jobs]);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async (overrideFilters = null) => {
+    const activeFilters = overrideFilters ?? filtersRef.current;
     setIsLoading(true);
     setError(null);
     try {
-      const response = await getJobs(filters);
-      const data = response.data;
-      
-      const jobsArray = data.jobs || [];
+      const response = await getJobs(activeFilters);
+      const jobsArray = response.data?.jobs ?? [];
       setJobs(jobsArray);
-      
-      // Calculate best matches (top 6-8 jobs with match score > 70%)
+
       const sortedByMatch = [...jobsArray]
-        .filter(job => job.matchScore && job.matchScore > 70)
+        .filter((job) => job.matchScore && job.matchScore > 70)
         .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
         .slice(0, 8);
-      
+
       setBestMatches(sortedByMatch);
     } catch (err) {
       console.error('Failed to fetch jobs:', err);
@@ -47,55 +44,84 @@ const Jobs = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  const fetchResumeStatus = useCallback(async () => {
+    try {
+      const response = await getResumeStatus();
+      const status = Boolean(response.data?.hasResume);
+      setHasResume(status);
+      return status;
+    } catch (err) {
+      console.error('Failed to load resume status:', err);
+      setHasResume(false);
+      return false;
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchJobs();
+    fetchResumeStatus();
+  }, [fetchJobs, fetchResumeStatus]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [filters, jobs]);
+
+  useEffect(() => {
+    const handleResumeEvent = () => {
+      setHasResume(true);
+      fetchJobs();
+    };
+
+    window.addEventListener('resume-status-change', handleResumeEvent);
+    return () => window.removeEventListener('resume-status-change', handleResumeEvent);
+  }, [fetchJobs]);
 
   const applyFilters = () => {
     let filtered = [...jobs];
 
-    // Apply match score filter
     if (filters.matchScore === 'high') {
-      filtered = filtered.filter(job => job.matchScore && job.matchScore > 70);
+      filtered = filtered.filter((job) => job.matchScore && job.matchScore > 70);
     } else if (filters.matchScore === 'medium') {
-      filtered = filtered.filter(job => job.matchScore && job.matchScore >= 40 && job.matchScore <= 70);
+      filtered = filtered.filter(
+        (job) => job.matchScore && job.matchScore >= 40 && job.matchScore <= 70
+      );
+    }
+
+    if (filters.skills?.length) {
+      filtered = filtered.filter((job) => {
+        if (!job.skills) return false;
+        return filters.skills.every((skill) => job.skills.includes(skill));
+      });
+    }
+
+    if (filters.query) {
+      const query = filters.query.toLowerCase();
+      filtered = filtered.filter(
+        (job) =>
+          job.title?.toLowerCase().includes(query) ||
+          job.company?.toLowerCase().includes(query)
+      );
     }
 
     setFilteredJobs(filtered);
   };
 
   const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClearFilters = () => {
     setFilters({});
-    fetchJobs();
+    fetchJobs({});
   };
 
   const handleAIFilterUpdate = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-    fetchJobsWithFilters(newFilters);
-  };
-
-  const fetchJobsWithFilters = async (newFilters) => {
-    setIsLoading(true);
-    try {
-      const response = await getJobs(newFilters);
-      const data = response.data;
-      const jobsArray = data.jobs || [];
-      setJobs(jobsArray);
-      
-      // Recalculate best matches
-      const sortedByMatch = [...jobsArray]
-        .filter(job => job.matchScore && job.matchScore > 70)
-        .sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0))
-        .slice(0, 8);
-      
-      setBestMatches(sortedByMatch);
-    } catch (err) {
-      console.error('Failed to fetch jobs:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    const mergedFilters = { ...filtersRef.current, ...newFilters };
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+    fetchJobs(mergedFilters);
+    setFilterSheetOpen(false);
   };
 
   const handleApply = (job) => {
@@ -106,103 +132,268 @@ const Jobs = () => {
     console.log('Application saved');
   };
 
+  const openFilterSheet = () => setFilterSheetOpen(true);
+  const closeFilterSheet = () => setFilterSheetOpen(false);
+
+  const activeFilterCount = useMemo(() => {
+    return Object.entries(filters).filter(([, value]) => {
+      if (!value) return false;
+      if (Array.isArray(value)) return value.length > 0;
+      if (typeof value === 'string') {
+        return value.trim() !== '' && value !== 'all';
+      }
+      return true;
+    }).length;
+  }, [filters]);
+
+  const stats = useMemo(
+    () => [
+      { label: 'Open Positions', value: jobs.length || 0 },
+      { label: 'Top Matches', value: bestMatches.length || 0 },
+      { label: 'Active Filters', value: activeFilterCount },
+    ],
+    [jobs.length, bestMatches.length, activeFilterCount]
+  );
+
+  const heroSubtitle = hasResume
+    ? 'Your profile is analyzed. Browse AI-matched opportunities below.'
+    : 'Upload your resume to unlock intelligent job matching and personalized recommendations.';
+
+  const resultsLabel = useMemo(() => {
+    if (isLoading) return 'Loading opportunities';
+    if (!filteredJobs.length) return 'No positions found';
+    return `${filteredJobs.length} position${filteredJobs.length === 1 ? '' : 's'}`;
+  }, [isLoading, filteredJobs.length]);
+
+  const showBestMatches = hasResume && bestMatches.length > 0 && !filters.matchScore;
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-6">
-          {/* Filters Sidebar */}
-          <aside className="w-80 flex-shrink-0">
-            <Filters
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClear={handleClearFilters}
-            />
-          </aside>
+      <section className="hero">
+        <div className="hero-content">
+          <div className="hero-header">
+            <div className="hero-branding">
+              <div className="hero-title-block">
+                <h1>Discover Your Next Career Move</h1>
+                <p>{heroSubtitle}</p>
+              </div>
+            </div>
+            <div className="hero-actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ background: 'rgba(255, 255, 255, 0.16)', color: 'white', border: '1.5px solid rgba(255, 255, 255, 0.3)' }}
+                onClick={() => handleFilterChange('matchScore', 'high')}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Top Matches
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary lg:hidden"
+                onClick={openFilterSheet}
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span style={{
+                    marginLeft: '0.25rem',
+                    padding: '0.125rem 0.5rem',
+                    borderRadius: '999px',
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    fontSize: '0.75rem',
+                    fontWeight: 700
+                  }}>
+                    {activeFilterCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
 
-          {/* Main Content */}
-          <main className="flex-1">
-            {isLoading ? (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <div className="hero-stats">
+            {stats.map((stat) => (
+              <div key={stat.label} className="stat-item">
+                <div className="stat-label">{stat.label}</div>
+                <div className="stat-value">{stat.value}</div>
               </div>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-600" />
-                <p className="text-red-700">{error}</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="page-container">
+        <aside className="sidebar">
+          <Filters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClear={handleClearFilters}
+            activeCount={activeFilterCount}
+          />
+        </aside>
+
+        <main className="main-content">
+          {showBestMatches && (
+            <section className="best-matches">
+              <div className="best-matches-header">
+                <div>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--slate-500)', marginBottom: '0.25rem', fontWeight: 600 }}>
+                    AI Recommendations
+                  </p>
+                  <h2 className="best-matches-title">
+                    <Sparkles className="w-6 h-6" style={{ color: 'var(--orange-500)' }} />
+                    Best Matches For You
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => handleFilterChange('matchScore', 'high')}
+                >
+                  View All Top Matches
+                </button>
               </div>
-            ) : (
+              <div className="best-matches-scroll">
+                {bestMatches.map((job) => (
+                  <JobCard key={job.id} job={job} onApply={() => handleApply(job)} compact />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '1.5rem',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--slate-900)', marginBottom: '0.25rem' }}>
+                  All Opportunities
+                </h2>
+                <p style={{ color: 'var(--slate-600)' }}>{resultsLabel}</p>
+              </div>
+            </div>
+
+            {isLoading && (
+              <div className="clay-card" style={{ padding: '3rem', textAlign: 'center' }}>
+                <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--slate-400)', margin: '0 auto' }} />
+                <p style={{ marginTop: '1rem', color: 'var(--slate-600)' }}>Loading positions...</p>
+              </div>
+            )}
+
+            {!isLoading && error && (
+              <div className="clay-card" style={{ padding: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <AlertCircle className="w-6 h-6" style={{ color: 'var(--orange-500)' }} />
+                <p style={{ color: 'var(--slate-700)' }}>{error}</p>
+              </div>
+            )}
+
+            {!isLoading && !error && (
               <>
-                {/* Best Matches Section */}
-                {bestMatches.length > 0 && !filters.matchScore && (
-                  <div className="mb-8">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-lg p-6 text-white">
-                      <div className="flex items-center gap-3">
-                        <div className="bg-white/20 rounded-lg p-2">
-                          <Sparkles className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <h2 className="text-2xl font-bold">Best Matches for You</h2>
-                          <p className="text-blue-100 text-sm mt-1">
-                            Top {bestMatches.length} jobs with 70%+ match score based on your resume
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white border-x-2 border-b-2 border-blue-600 rounded-b-lg p-4 shadow-lg">
-                      <div className="grid gap-4">
-                        {bestMatches.map((job) => (
-                          <div key={job.id} className="border-l-4 border-green-500 bg-green-50/50 rounded-lg">
-                            <JobCard job={job} onApply={() => handleApply(job)} />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                {filteredJobs.length === 0 ? (
+                  <div style={{
+                    padding: '4rem 2rem',
+                    textAlign: 'center',
+                    borderRadius: '28px',
+                    border: '2px dashed var(--slate-300)',
+                    background: 'rgba(255, 255, 255, 0.6)'
+                  }}>
+                    <AlertCircle className="w-12 h-12" style={{ color: 'var(--slate-400)', margin: '0 auto 1rem' }} />
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--slate-900)', marginBottom: '0.5rem' }}>
+                      No positions match your filters
+                    </h3>
+                    <p style={{ color: 'var(--slate-600)', marginBottom: '1.5rem' }}>
+                      Try adjusting your search criteria or clearing filters
+                    </p>
+                    <button type="button" className="btn btn-primary" onClick={handleClearFilters}>
+                      Clear All Filters
+                    </button>
+                  </div>
+                ) : (
+                  <div className="job-grid">
+                    {filteredJobs.map((job) => (
+                      <JobCard key={job.id} job={job} onApply={() => handleApply(job)} />
+                    ))}
                   </div>
                 )}
-
-                {/* All Jobs Section */}
-                <div>
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                      {filters.matchScore ? ' Filtered Jobs' : ' All Jobs'}
-                    </h2>
-                    <p className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-                      {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'}
-                    </p>
-                  </div>
-
-                  {filteredJobs.length === 0 ? (
-                    <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-300">
-                      <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 text-lg mb-2">No jobs found matching your criteria</p>
-                      <button
-                        onClick={handleClearFilters}
-                        className="mt-4 text-blue-600 hover:text-blue-700 font-medium"
-                      >
-                        Clear filters
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid gap-4">
-                      {filteredJobs.map((job) => (
-                        <JobCard key={job.id} job={job} onApply={() => handleApply(job)} />
-                      ))}
-                    </div>
-                  )}
-                </div>
               </>
             )}
-          </main>
+          </section>
+        </main>
+      </div>
+
+      {/* Mobile Filter Sheet */}
+      <div
+        className={`modal-overlay ${isFilterSheetOpen ? '' : ''}`}
+        style={{
+          display: isFilterSheetOpen ? 'flex' : 'none',
+          alignItems: 'flex-end',
+          padding: 0
+        }}
+        onClick={closeFilterSheet}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '640px',
+            margin: '0 auto',
+            background: 'var(--color-bg-surface)',
+            borderTopLeftRadius: '32px',
+            borderTopRightRadius: '32px',
+            padding: '1.5rem',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            boxShadow: 'var(--shadow-clay-xl)',
+            animation: isFilterSheetOpen ? 'slideUp 320ms ease' : 'none'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--slate-500)', fontWeight: 600 }}>Filter Options</p>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--slate-900)' }}>Refine Your Search</h3>
+            </div>
+            <button
+              onClick={closeFilterSheet}
+              className="btn-ghost"
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '50%',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <Filters
+            filters={filters}
+            onFilterChange={handleFilterChange}
+            onClear={handleClearFilters}
+            activeCount={activeFilterCount}
+          />
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--slate-200)' }}>
+            <button type="button" className="btn btn-secondary" onClick={handleClearFilters} style={{ flex: 1 }}>
+              Clear All
+            </button>
+            <button type="button" className="btn btn-primary" onClick={closeFilterSheet} style={{ flex: 1 }}>
+              Show {filteredJobs.length} Results
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* AI Assistant */}
       <AIAssistant onFilterUpdate={handleAIFilterUpdate} />
 
-      {/* Apply Popup */}
       {selectedJob && (
         <ApplyPopup
           job={selectedJob}

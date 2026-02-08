@@ -7,6 +7,7 @@ import jobRoutes from './routes/jobs.js';
 import resumeRoutes from './routes/resume.js';
 import applicationRoutes from './routes/applications.js';
 import aiRoutes from './routes/ai.js';
+import adminRoutes from './routes/admin.js';
 
 dotenv.config();
 
@@ -37,7 +38,8 @@ fastify.get('/', async (request, reply) => {
       jobs: '/api/jobs',
       resume: '/api/resume/*',
       applications: '/api/applications',
-      ai: '/api/ai/chat'
+      ai: '/api/ai/chat',
+      admin: '/api/admin/*'
     },
     frontend: 'http://localhost:3000',
     documentation: 'Visit the frontend at http://localhost:3000'
@@ -55,6 +57,7 @@ fastify.register(jobRoutes, { prefix: '/api/jobs' });
 fastify.register(resumeRoutes, { prefix: '/api/resume' });
 fastify.register(applicationRoutes, { prefix: '/api/applications' });
 fastify.register(aiRoutes, { prefix: '/api/ai' });
+fastify.register(adminRoutes, { prefix: '/api/admin' });
 
 // Start server
 const start = async () => {
